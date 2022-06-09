@@ -1,0 +1,5 @@
+name=Bunnymark
+author=Ramon Santamaria (@raysan5), George Linkovsky (@Timofffee)
+description=Bunnymark from raylib examples.
+bundleID=com.raylib.bunnymark
+imagePath=
