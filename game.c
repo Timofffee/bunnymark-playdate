@@ -32,20 +32,17 @@ void setPDPtr(PlaydateAPI* p) { pd = p; }
 
 LCDBitmap *loadImageAtPath(const char *path)
 {
-	pd->system->logToConsole("Load '%s'", path);
 	const char *outErr = NULL;
 	LCDBitmap *img = pd->graphics->loadBitmap(path, &outErr);
 	if ( outErr != NULL ) {
 		pd->system->logToConsole("Error loading image at path '%s': %s", path, outErr);
 	}
-	pd->system->logToConsole("Loaded '%s': %s", path, outErr);
 	return img;
 }
 
 // game initialization
 void setupGame(void)
 {
-	pd->system->logToConsole("setupGame");
 	srand(pd->system->getSecondsSinceEpoch(NULL));
 
 	bunnies = pd->system->realloc(NULL, sizeof(Bunny) * MAX_BUNNIES);
@@ -56,9 +53,9 @@ void setupGame(void)
 }
 
 
-void instantiateBunnies(void)
+void instantiateBunnies(int count)
 {
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < count; i++)
 	{
 		if (bunniesCount < MAX_BUNNIES)
 		{
@@ -75,12 +72,17 @@ void instantiateBunnies(void)
 void checkButtons(void)
 {
 	PDButtons pushed;
-	pd->system->getButtonState(&pushed, NULL, NULL);
+	PDButtons start;
+	pd->system->getButtonState(&pushed, &start, NULL);
 
-	pressed = ( pushed & kButtonA || pushed & kButtonB );
-	if (pressed)
+	pressed = ( start & kButtonA || pushed & kButtonB );
+	if (start & kButtonA)
 	{
-		instantiateBunnies();
+		instantiateBunnies(1);
+	}
+	if (pushed & kButtonB)
+	{
+		instantiateBunnies(10);
 	}
 }
 
@@ -92,10 +94,10 @@ void updateBunnies(void)
 		bunnies[i].position.x += bunnies[i].speed.x;
 		bunnies[i].position.y += bunnies[i].speed.y;
 
-		if (((bunnies[i].position.x + 8) > 400) ||
-			((bunnies[i].position.x + 8) < 0)) bunnies[i].speed.x *= -1;
-		if (((bunnies[i].position.y + 8) > 240) ||
-			((bunnies[i].position.y + 8 - 40) < 0)) bunnies[i].speed.y *= -1;
+		if (((bunnies[i].position.x + 8) > 378) ||
+			((bunnies[i].position.x + 8) < 8)) bunnies[i].speed.x *= -1;
+		if (((bunnies[i].position.y + 8) > 211) ||
+			((bunnies[i].position.y + 8 - 40) < 8)) bunnies[i].speed.y *= -1;
 	}
 }
 
@@ -114,7 +116,7 @@ void drawBunnies(void)
 		int rX = rand() % 4 - 2;
 		int rY = rand() % 4 - 2;
 
-		pd->graphics->drawRect(5 + rX, 5 + rY, 390 + rX, 230 + rY, kColorBlack);
+		pd->graphics->drawRect(5 + rX, 40 + rY, 390 + rX, 195 + rY, kColorBlack);
 
 		pd->system->drawFPS(10 + rX, 10 + rY);
 
@@ -124,7 +126,7 @@ void drawBunnies(void)
 	}
 	else
 	{
-		pd->graphics->drawRect(5, 5, 390, 230, kColorBlack);
+		pd->graphics->drawRect(5, 40, 390, 195, kColorBlack);
 
 		pd->system->drawFPS(10,10);
 
