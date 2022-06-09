@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "game.h"
 
-#define MAX_BUNNIES 50000
+#define MAX_BUNNIES 5000
 
 static PlaydateAPI* pd = NULL;
 
@@ -29,13 +29,40 @@ LCDBitmap *texBunny = NULL;;
 
 void setPDPtr(PlaydateAPI* p) { pd = p; }
 
+static inline int isButtonDown(PDButtons button)
+{
+	PDButtons down;
+	pd->system->getButtonState(NULL, &down, NULL);
+	return down & button;
+}
+
+static inline int isButtonPressed(PDButtons button)
+{
+	PDButtons pressed;
+	pd->system->getButtonState(&pressed, NULL, NULL);
+	return pressed & button;
+}
+
+static inline int isButtonUp(PDButtons button)
+{
+	PDButtons up;
+	pd->system->getButtonState(NULL, NULL, &up);
+	return up & button;
+}
+
 
 LCDBitmap *loadImageAtPath(const char *path)
 {
+	pd->system->logToConsole("Loading image '%s'", path);
 	const char *outErr = NULL;
 	LCDBitmap *img = pd->graphics->loadBitmap(path, &outErr);
-	if ( outErr != NULL ) {
+	if ( outErr != NULL )
+	{
 		pd->system->logToConsole("Error loading image at path '%s': %s", path, outErr);
+	}
+	else
+	{
+		pd->system->logToConsole("Loaded image '%s'", path);
 	}
 	return img;
 }
@@ -43,6 +70,7 @@ LCDBitmap *loadImageAtPath(const char *path)
 // game initialization
 void setupGame(void)
 {
+	pd->system->logToConsole("Setup Start");
 	srand(pd->system->getSecondsSinceEpoch(NULL));
 
 	bunnies = pd->system->realloc(NULL, sizeof(Bunny) * MAX_BUNNIES);
@@ -50,6 +78,7 @@ void setupGame(void)
 	texBunny = loadImageAtPath("images/wabbit_alpha");
 
 	bunniesCount = 0;
+	pd->system->logToConsole("Setup Done");
 }
 
 
@@ -75,12 +104,12 @@ void checkButtons(void)
 	PDButtons start;
 	pd->system->getButtonState(&pushed, &start, NULL);
 
-	pressed = ( start & kButtonA || pushed & kButtonB );
-	if (start & kButtonA)
+	pressed = ( isButtonDown(kButtonA) || isButtonDown(kButtonB) );
+	if (isButtonDown(kButtonA))
 	{
 		instantiateBunnies(1);
 	}
-	if (pushed & kButtonB)
+	if (isButtonDown(kButtonB))
 	{
 		instantiateBunnies(10);
 	}

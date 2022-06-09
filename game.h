@@ -8,5 +8,6 @@
 int update(void* ud);
 void setPDPtr(PlaydateAPI* p);
 void setupGame(void);
+void terminate(void);
 
 #endif
